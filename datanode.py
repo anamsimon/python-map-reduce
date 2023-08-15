@@ -2,6 +2,7 @@
 import Pyro4
 import pandas as pd
 import os
+import time
 
 @Pyro4.expose
 class DataNode(object):
@@ -11,7 +12,7 @@ class DataNode(object):
         self._name = name
         try:
             self.data_frame = pd.read_csv(self.file_name)
-            print('{0} dataframe count {1}'.format(self._name, len(self.data_frame.index)))
+            print('Record count {0}'.format(len(self.data_frame.index)))
 
         except FileNotFoundError:
             print(f"Error: File '{self.file_name}' not found.")
@@ -21,6 +22,7 @@ class DataNode(object):
         return self._name
     
     def map(self, top, genres):
+        start_time = time.time()
         print('{0} request rcvd {1} {2}'.format(self.name, top, genres))
         df = self.data_frame
         
@@ -35,7 +37,9 @@ class DataNode(object):
 
         for row in filtered_df.itertuples(index=False):
             output.append([row.original_title, row.popularity, row.genre_list])
-      
+        end_time = time.time()
+        runtime = end_time - start_time
+        print("Map time:", round(runtime,2), "sec")
         return output
 
 
@@ -49,13 +53,17 @@ if __name__ == "__main__":
         dataset_files = get_files_with_prefix("dataset", ".csv")
 
         for file_name in dataset_files:
+            start_time = time.time()
             name, extension = os.path.splitext(file_name)
             datanodename= "node.mapreduce." + name
+            print(datanodename)
             datanode  = DataNode(datanodename, file_name)
             datanode_uri = daemon.register(datanode)
             with Pyro4.locateNS() as ns:                
-                ns.register(datanodename, datanode_uri)
-                print(datanodename + " - running")
+                ns.register(datanodename, datanode_uri)    
+            end_time = time.time()
+            runtime = end_time - start_time
+            print("Loadtime:", round(runtime,2), "sec")
         print("data nodes available.")
         daemon.requestLoop()
 

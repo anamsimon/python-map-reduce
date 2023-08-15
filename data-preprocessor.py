@@ -33,6 +33,8 @@ filtered_data = filtered_data[filtered_data['genre_list'].map(lambda d: len(d)) 
 
 filtered_data = filtered_data.filter(['original_title','genre_list','popularity','overview'], axis=1)
 
+filtered_data.to_csv('full_dataset.csv')
+
 df_shuffled = filtered_data.sample(frac=1)
 df_splits = np.array_split(df_shuffled, 10)
 count = 1
