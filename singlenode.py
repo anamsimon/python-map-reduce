@@ -39,7 +39,7 @@ class SingleNode(object):
             output.append([row.original_title, row.popularity, row.genre_list])
         end_time = time.time()
         runtime = end_time - start_time
-        print("Map time:", round(runtime,2), "sec")
+        print("Map time:", round(runtime,10), "sec")
         return output
 
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
             ns.register(datanodename, datanode_uri)    
         end_time = time.time()
         runtime = end_time - start_time
-        print("Loadtime:", round(runtime,2), "sec")
+        print("Loadtime:", round(runtime,10), "sec")
         print("Single datanode available.")
         daemon.requestLoop()
 

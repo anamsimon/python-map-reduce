@@ -1,7 +1,6 @@
 import pandas as pd
 import ast
 import numpy as np
-from IPython.display import display
 
 data = pd.read_csv('movies_metadata.csv')
 # adult,belongs_to_collection,budget,genres,
@@ -36,9 +35,9 @@ filtered_data = filtered_data.filter(['original_title','genre_list','popularity'
 filtered_data.to_csv('full_dataset.csv')
 
 df_shuffled = filtered_data.sample(frac=1)
-df_splits = np.array_split(df_shuffled, 10)
+df_splits = np.array_split(df_shuffled, 50)
 count = 1
 for df in df_splits:
    ##display(df)
-   df.to_csv('dataset' + str(count) + '.csv')
+   df.to_csv('50_dataset' + str(count) + '.csv')
    count = count + 1

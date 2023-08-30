@@ -26,19 +26,19 @@ class NameNode(object):
                 result_df.loc[len(result_df.index)] = [datanode.name, row[0], row[1], row[2]]
         end_time = time.time()
         runtime = end_time - start_time
-        print("Map time:", round(runtime,2), "sec")
+        print("Map time:", round(runtime,10), "sec")
         #result_df = pd.DataFrame(results, columns=["original_title", "popularity", "genre_list"]) 
         start_time = time.time()
         shuffled_df = self.shuffle(result_df)
         end_time = time.time()
         runtime = end_time - start_time
-        print("Shuffle time:", round(runtime,2), "sec")
+        print("Shuffle time:", round(runtime,10), "sec")
 
         start_time = time.time()
         reduced_df = self.reduce(shuffled_df, top)
         end_time = time.time()
         runtime = end_time - start_time
-        print("Reduce time:", round(runtime,2), "sec")
+        print("Reduce time:", round(runtime,10), "sec")
         return reduced_df
 
     def shuffle(self, result_df):

@@ -3,6 +3,8 @@ import Pyro4
 import pandas as pd
 import os
 import time
+import asyncio
+
 
 @Pyro4.expose
 class DataNode(object):
@@ -39,7 +41,8 @@ class DataNode(object):
             output.append([row.original_title, row.popularity, row.genre_list])
         end_time = time.time()
         runtime = end_time - start_time
-        print("Map time:", round(runtime,2), "sec")
+        print("Map time:", round(runtime,10), "sec")
+        
         return output
 
 
@@ -48,7 +51,17 @@ def get_files_with_prefix(prefix, extension):
     file_list = [file_name for file_name in os.listdir(current_directory) if os.path.isfile(os.path.join(current_directory, file_name)) and file_name.startswith(prefix) and file_name.endswith(extension)]
     return file_list
 
-if __name__ == "__main__":
+def register_pyro(daemon, datanodename, datanode):
+    datanode_uri = daemon.register(datanode)
+    with Pyro4.locateNS() as ns:                
+        ns.register(datanodename, datanode_uri)    
+
+async def async_wrapper(daemon, datanodename, datanode):
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(None, register_pyro, daemon, datanodename, datanode)
+    return result
+
+def main():
     with Pyro4.Daemon() as daemon:
         dataset_files = get_files_with_prefix("dataset", ".csv")
 
@@ -58,14 +71,17 @@ if __name__ == "__main__":
             datanodename= "node.mapreduce." + name
             print(datanodename)
             datanode  = DataNode(datanodename, file_name)
+            # async_wrapper(daemon, datanodename, datanode)
             datanode_uri = daemon.register(datanode)
             with Pyro4.locateNS() as ns:                
-                ns.register(datanodename, datanode_uri)    
-            end_time = time.time()
-            runtime = end_time - start_time
-            print("Loadtime:", round(runtime,2), "sec")
+                ns.register(datanodename, datanode_uri)
+            print("Loadtime:", round(time.time()  - start_time ,10), "sec")
         print("data nodes available.")
         daemon.requestLoop()
+
+if __name__ == "__main__":
+    # asyncio.run(main())
+    main()   
 
 
 
